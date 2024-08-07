@@ -73,55 +73,55 @@ app = FastAPI(debug=True)
 @dataclass
 class Client_credit:
     """Class representant un client d'un crédit"""
-    SK_ID_CURR:                                     int             # l'index du credit
-    FLAG_OWN_REALTY:                                int             # Si le client est propriétaire de son logement
-    FLAG_OWN_CAR:                                   int             # Si le client a et est propriétaire d'une voiture
-    OWN_CAR_AGE:                                    float           # Age de la voiture
-    PAYMENT_RATE:                                   float           # Pourcentage du montant du crédit remboursé annuellement [pré-processing]
-    NAME_INCOME_TYPE_Working:                       bool            # True si les revennus du client proviennent d'un salaire
-    NAME_INCOME_TYPE_Commercialassociate:           bool            # True si les revennus du client sont des commissions (commerce)
-    NAME_EDUCATION_TYPE_Highereducation:            bool            # True si le client a fait des études supérieurs
-    NAME_EDUCATION_TYPE_Secondarysecondaryspecial:  bool            # True si le client a fini les études secondaires
-    NAME_FAMILY_STATUS_Married:                     bool            # True si le client est marié
-    NAME_FAMILY_STATUS_Singlenotmarried:            bool            # True si le client est célibataire
-    PRED_PROBA:                                     float = 0       # probabilité que le client ait des retards de paiement
-    PRED_TARGET:                                    int = 0         # TARGET predite et calculé à partir de PRED_PROBA
-    TARGET:                                         bool = 0        # 0 si le client a des retards de paiement => crédit à rejeter
+    SK_ID_CURR:                 int             # l'index du credit
+    FLAG_OWN_REALTY:            int             # Si le client est propriétaire de son logement
+    FLAG_OWN_CAR:               int             # Si le client a et est propriétaire d'une voiture
+    OWN_CAR_AGE:                float           # Age de la voiture
+    NAME_INCOME_TYPE_Working:   bool            # True si les revennus du client proviennent d'un salaire
+    DAYS_EMPLOYED:              float           # Ancienneté du client dans son emploi actuel
+    AMT_GOODS_PRICE:            float           # Prix du bien que le client veut acheter
+    AMT_CREDIT:                 float           # Montant du prêt
+    EXT_SOURCE_1_x:             float           # score from external data source
+    EXT_SOURCE_2_x:             float           # score from external data source
+    EXT_SOURCE_3_x:             float           # score from external data source
+    PRED_PROBA:                 float = 0       # probabilité que le client ait des retards de paiement
+    PRED_TARGET:                int = 0         # TARGET predite et calculé à partir de PRED_PROBA
+    TARGET:                     bool = 0        # 0 si le client a des retards de paiement => crédit à rejeter
 
 @dataclass
 class Client_new_credit:
     """Class representant un client pour un nouveau crédit (même structure que Client_credit mais sans TARGET ni prédiction)"""
-    SK_ID_CURR:                                     int             # l'index du crédit
-    FLAG_OWN_REALTY:                                int             # Si le client est propriétaire de son logement
-    FLAG_OWN_CAR:                                   int             # Si le client a et est propriétaire d'une voiture
-    OWN_CAR_AGE:                                    float           # Age de la voiture
-    PAYMENT_RATE:                                   float           # Pourcentage du montant du crédit remboursé annuellement [pré-processing]
-    NAME_INCOME_TYPE_Working:                       bool            # True si les revennus du client proviennent d'un salaire
-    NAME_INCOME_TYPE_Commercialassociate:           bool            # True si les revennus du client sont des commissions (commerce)
-    NAME_EDUCATION_TYPE_Highereducation:            bool            # True si le client a fait des études supérieurs
-    NAME_EDUCATION_TYPE_Secondarysecondaryspecial:  bool            # True si le client a fini les études secondaires
-    NAME_FAMILY_STATUS_Married:                     bool            # True si le client est marié
-    NAME_FAMILY_STATUS_Singlenotmarried:            bool            # True si le client est célibataire
+    SK_ID_CURR:                 int             # l'index du crédit
+    FLAG_OWN_REALTY:            int             # Si le client est propriétaire de son logement
+    FLAG_OWN_CAR:               int             # Si le client a et est propriétaire d'une voiture
+    OWN_CAR_AGE:                float           # Age de la voiture
+    NAME_INCOME_TYPE_Working:   bool            # True si les revennus du client proviennent d'un salaire
+    DAYS_EMPLOYED:              float           # Ancienneté du client dans son emploi actuel
+    AMT_GOODS_PRICE:            float           # Prix du bien que le client veut acheter
+    AMT_CREDIT:                 float           # Montant du prêt
+    EXT_SOURCE_1_x:             float           # score from external data source
+    EXT_SOURCE_2_x:             float           # score from external data source
+    EXT_SOURCE_3_x:             float           # score from external data source
 
 #--------------------------------------------------------------------------------------------------------------------------------
 
 def Client_credit_from_data(client_data):
     """Obtient un Client_credit à partir d'un SK_ID_CURR"""
 
-    the_client=Client_credit(SK_ID_CURR                                      = client_data['SK_ID_CURR'],
-                             FLAG_OWN_REALTY                                 = client_data['FLAG_OWN_REALTY'],
-                             FLAG_OWN_CAR                                    = client_data['FLAG_OWN_CAR'],
-                             OWN_CAR_AGE                                     = client_data['OWN_CAR_AGE'],
-                             PAYMENT_RATE                                    = client_data['PAYMENT_RATE'],
-                             NAME_INCOME_TYPE_Working                        = client_data['NAME_INCOME_TYPE_Working'],
-                             NAME_INCOME_TYPE_Commercialassociate            = client_data['NAME_INCOME_TYPE_Commercialassociate'],
-                             NAME_EDUCATION_TYPE_Highereducation             = client_data['NAME_EDUCATION_TYPE_Highereducation'],
-                             NAME_EDUCATION_TYPE_Secondarysecondaryspecial   = client_data['NAME_EDUCATION_TYPE_Secondarysecondaryspecial'],
-                             NAME_FAMILY_STATUS_Married                      = client_data['NAME_FAMILY_STATUS_Married'],
-                             NAME_FAMILY_STATUS_Singlenotmarried             = client_data['NAME_FAMILY_STATUS_Singlenotmarried'],
-                             PRED_PROBA                                      = client_data['y_pred_proba'],
-                             PRED_TARGET                                     = client_data['y_pred'],
-                             TARGET                                          = client_data['TARGET']
+    the_client=Client_credit(SK_ID_CURR               = client_data['SK_ID_CURR'],
+                             FLAG_OWN_REALTY          = client_data['FLAG_OWN_REALTY'],
+                             FLAG_OWN_CAR             = client_data['FLAG_OWN_CAR'],
+                             OWN_CAR_AGE              = client_data['OWN_CAR_AGE'],
+                             NAME_INCOME_TYPE_Working = client_data['NAME_INCOME_TYPE_Working'],
+                             DAYS_EMPLOYED            = client_data['DAYS_EMPLOYED'],
+                             AMT_GOODS_PRICE          = client_data['AMT_GOODS_PRICE'],
+                             AMT_CREDIT               = client_data['AMT_CREDIT'],
+                             EXT_SOURCE_1_x           = client_data['EXT_SOURCE_1_x'],
+                             EXT_SOURCE_2_x           = client_data['EXT_SOURCE_2_x'],
+                             EXT_SOURCE_3_x           = client_data['EXT_SOURCE_3_x'],
+                             PRED_PROBA               = client_data['y_pred_proba'],
+                             PRED_TARGET              = client_data['y_pred'],
+                             TARGET                   = client_data['TARGET']
                             )
     return the_client
 
@@ -148,16 +148,16 @@ def Client_credit_to_new_data(client_data: Client_new_credit):
     new_data_df = merged_data_df[merged_data_df['SK_ID_CURR']==client_data.SK_ID_CURR].copy()   # Copy car on va modifier la donnée
 
     # Transfert les nouvelles données dans le dataframe
-    new_data_df['FLAG_OWN_REALTY']                               = client_data.FLAG_OWN_REALTY
-    new_data_df['FLAG_OWN_CAR']                                  = client_data.FLAG_OWN_CAR
-    new_data_df['OWN_CAR_AGE']                                   = client_data.OWN_CAR_AGE
-    new_data_df['PAYMENT_RATE']                                  = client_data.PAYMENT_RATE
-    new_data_df['NAME_INCOME_TYPE_Working']                      = client_data.NAME_INCOME_TYPE_Working
-    new_data_df['NAME_INCOME_TYPE_Commercialassociate']          = client_data.NAME_INCOME_TYPE_Commercialassociate
-    new_data_df['NAME_EDUCATION_TYPE_Highereducation']           = client_data.NAME_EDUCATION_TYPE_Highereducation
-    new_data_df['NAME_EDUCATION_TYPE_Secondarysecondaryspecial'] = client_data.NAME_EDUCATION_TYPE_Secondarysecondaryspecial
-    new_data_df['NAME_FAMILY_STATUS_Married']                    = client_data.NAME_FAMILY_STATUS_Married
-    new_data_df['NAME_FAMILY_STATUS_Singlenotmarried']           = client_data.NAME_FAMILY_STATUS_Singlenotmarried
+    new_data_df['FLAG_OWN_REALTY']          = client_data.FLAG_OWN_REALTY
+    new_data_df['FLAG_OWN_CAR']             = client_data.FLAG_OWN_CAR
+    new_data_df['OWN_CAR_AGE']              = client_data.OWN_CAR_AGE
+    new_data_df['NAME_INCOME_TYPE_Working'] = client_data.NAME_INCOME_TYPE_Working
+    new_data_df['DAYS_EMPLOYED']            = client_data.DAYS_EMPLOYED
+    new_data_df['AMT_GOODS_PRICE']          = client_data.AMT_GOODS_PRICE
+    new_data_df['AMT_CREDIT']               = client_data.AMT_CREDIT
+    new_data_df['EXT_SOURCE_1_x']           = client_data.EXT_SOURCE_1_x
+    new_data_df['EXT_SOURCE_2_x']           = client_data.EXT_SOURCE_2_x
+    new_data_df['EXT_SOURCE_3_x']           = client_data.EXT_SOURCE_3_x
 
     # il faut recalculer la prédiction pour le cas où des valeurs aient changées
     new_X       = new_data_df.drop(columns=['TARGET', 'y_pred_proba', 'y_pred'])
@@ -189,8 +189,8 @@ def calcul_nouveau_credit(new_client: Client_new_credit) -> Client_credit:
 def matrice_confusion() -> dict:
     '''Obtenir la matrice de confusion pour toutes les données de test + quelques identifiant choisi aléatoirement pour chaque catégorie'''
     return {"Matrice de confusion": f"TN={tn} - FN={fn} - FP={fp} - TP={tp}",
-            "Quelques TN":          ", ".join(map(str, merged_data_df[(merged_data_df['y_pred']==1) & (merged_data_df['TARGET']==0)]['SK_ID_CURR'].sample(10).to_list())),
-            "Quelques FN":          ", ".join(map(str, merged_data_df[(merged_data_df['y_pred']==0) & (merged_data_df['TARGET']==1)]['SK_ID_CURR'].sample(10).to_list())),
-            "Quelques FP":          ", ".join(map(str, merged_data_df[(merged_data_df['y_pred']==0) & (merged_data_df['TARGET']==0)]['SK_ID_CURR'].sample(10).to_list())),
-            "Quelques TP":          ", ".join(map(str, merged_data_df[(merged_data_df['y_pred']==1) & (merged_data_df['TARGET']==1)]['SK_ID_CURR'].sample(10).to_list()))
+            "Quelques TN": ", ".join(map(str, merged_data_df[(merged_data_df['y_pred']==1) & (merged_data_df['TARGET']==0)]['SK_ID_CURR'].sample(10).to_list())),
+            "Quelques FN": ", ".join(map(str, merged_data_df[(merged_data_df['y_pred']==0) & (merged_data_df['TARGET']==1)]['SK_ID_CURR'].sample(10).to_list())),
+            "Quelques FP": ", ".join(map(str, merged_data_df[(merged_data_df['y_pred']==0) & (merged_data_df['TARGET']==0)]['SK_ID_CURR'].sample(10).to_list())),
+            "Quelques TP": ", ".join(map(str, merged_data_df[(merged_data_df['y_pred']==1) & (merged_data_df['TARGET']==1)]['SK_ID_CURR'].sample(10).to_list()))
            }
