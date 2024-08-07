@@ -60,7 +60,7 @@ cloudpickle==3.0.0
 colorama==0.4.6
 colorcet==3.1.0
 comm==0.2.1
-conda==24.5.0
+conda==24.7.1
 conda-build==24.5.1
 conda-content-trust==0.2.0
 conda_index==0.5.0
@@ -250,7 +250,7 @@ patsy==0.5.6
 pexpect==4.8.0
 pickleshare==0.7.5
 pillow==10.4.0
-pip==24.0
+pip==24.2
 pkce==1.0.3
 pkginfo==1.10.0
 platformdirs==3.10.0
@@ -339,14 +339,14 @@ ruamel.yaml==0.17.21
 ruamel-yaml-conda==0.17.21
 s3fs==2024.3.1
 scikit-image==0.23.2
-scikit-learn==1.4.2
+scikit-learn==1.5.1
 scipy==1.11.4
 Scrapy==2.11.1
 seaborn==0.13.2
 semver==3.0.2
 Send2Trash==1.8.2
 service-identity==18.1.0
-setuptools==69.5.1
+setuptools==72.1.0
 shap==0.46.0
 shellingham==1.5.4
 sip==6.7.12

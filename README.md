@@ -27,4 +27,4 @@ Notes :
     Dû a un bugg avec pip freeze et la version 20.1, le fichier requirements.txt est généré avec la commande :
         pip list --format=freeze > requirements.txt
     
-    Ajout d'un fichier runtime.txt pour spécifier la version de Python
+    Ajout d'un fichier runtime.txt pour spécifier la version de Pythony
