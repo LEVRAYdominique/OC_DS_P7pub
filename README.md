@@ -12,7 +12,7 @@ Ce dépôt contient la partie publique de ce projet et comprend :
 - des fichiers de gestion dont :
   - .slugignore pour contrôler quels fichiers sont publiés sur heroku
   - Procfile pour contrôler le lancement de l'API sur heroku
-  - requirements.txt pour reproduire l'environnement python
+  - requirements.txt pour reproduire l'environnement python pour heroku
 
 
 **Quelques valeurs de clients remarquables :**
@@ -23,8 +23,13 @@ Ce dépôt contient la partie publique de ce projet et comprend :
 - "Quelques FP": "213490, 132606, 425613, 414718, 299349, 321130, 215611, 186593, 128286, 422979",
 - "Quelques TP": "166700, 287807, 224163, 142769, 183960, 311408, 225829, 336600, 180035, 126228"
 
-Notes :
+
+**Notes concernant les pré-requis heroku:**
     Dû a un bugg avec pip freeze et la version 20.1, le fichier requirements.txt est généré avec la commande :
         pip list --format=freeze > requirements.txt
-    
+
+    L'API est conçu pour fonctionner sur heroku qui est une plateforme linux
+        suppression à la main de requirements.txt du package
+            pywin32 
+
     Ajout d'un fichier runtime.txt pour spécifier la version de Pythony
