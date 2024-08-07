@@ -6,15 +6,15 @@ flavors:
     loader_module: mlflow.sklearn
     model_path: model.pkl
     predict_fn: predict
-    python_version: 3.12.3
+    python_version: 3.12.4
   sklearn:
     code: null
     pickled_model: model.pkl
     serialization_format: cloudpickle
-    sklearn_version: 1.4.2
-mlflow_version: 2.14.2
-model_size_bytes: 479367
-model_uuid: feaa3efb6d04473eb5bd42475811c0fd
+    sklearn_version: 1.5.1
+mlflow_version: 2.15.1
+model_size_bytes: 479022
+model_uuid: f0da778d499c4ceab10e366ad0ae4fe1
 signature:
   inputs: '[{"type": "long", "name": "SK_ID_CURR", "required": true}, {"type": "integer",
     "name": "NAME_CONTRACT_TYPE", "required": true}, {"type": "integer", "name": "CODE_GENDER",
@@ -291,4 +291,4 @@ signature:
     "required": true}, {"type": "double", "name": "DAYS_BIRTH3", "required": true}]'
   outputs: '[{"type": "long", "name": "TARGET", "required": true}]'
   params: null
-utc_time_created: '2024-08-06 10:43:10.429160'
+utc_time_created: '2024-08-07 09:55:51.638638'
