@@ -23,6 +23,8 @@ Ce dépôt contient la partie publique de ce projet et comprend :
 - "Quelques FP": "213490, 132606, 425613, 414718, 299349, 321130, 215611, 186593, 128286, 422979",
 - "Quelques TP": "166700, 287807, 224163, 142769, 183960, 311408, 225829, 336600, 180035, 126228"
 
-Note :
+Notes :
     Dû a un bugg avec pip freeze et la version 20.1, le fichier requirements.txt est généré avec la commande :
         pip list --format=freeze > requirements.txt
+    
+    Ajout d'un fichier runtime.txt pour spécifier la version de Python
