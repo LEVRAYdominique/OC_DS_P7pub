@@ -68,7 +68,6 @@ pydantic_core==2.20.1
 pyparsing==3.1.2
 python-dateutil==2.9.0.post0
 pytz==2024.1
-pywin32==306
 PyYAML==6.0.2
 querystring-parser==1.2.4
 requests==2.32.3
