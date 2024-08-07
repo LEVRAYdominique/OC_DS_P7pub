@@ -1,7 +1,3 @@
 levray_dominique_2c_preprocessing.py
 levray_dominique_5_test_api_072024.ipynb
-mlflow_model/conda.yaml
-mlflow_model/MLmodel
-mlflow_model/python_env.yaml
-mlflow_model/requirements.txt
 .gitignore

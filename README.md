@@ -29,7 +29,7 @@ Ce dépôt contient la partie publique de ce projet et comprend :
         pip list --format=freeze > requirements.txt
 
     L'API est conçu pour fonctionner sur heroku qui est une plateforme linux
-        suppression à la main de requirements.txt du package
+        => suppression à la main de requirements.txt des packages inutiles suivant :
             pywin32 
 
     Ajout d'un fichier runtime.txt pour spécifier la version de Pythony
