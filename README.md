@@ -13,3 +13,16 @@ Ce dépôt contient la partie publique de ce projet et comprend :
   - .slugignore pour contrôler quels fichiers sont publiés sur heroku
   - Procfile pour contrôler le lancement de l'API sur heroku
   - requirements.txt pour reproduire l'environnement python
+
+
+**Quelques valeurs de clients remarquables :**
+
+- "Matrice de confusion": "TN=54928 - FN=4057 - FP=1720 - TP=798",
+- "Quelques TN": "451879, 400678, 405872, 438462, 128526, 417574, 156652, 254016, 385475, 328019",
+- "Quelques FN": "268908, 228368, 399106, 112131, 265025, 282128, 256012, 117908, 343178, 216763",
+- "Quelques FP": "213490, 132606, 425613, 414718, 299349, 321130, 215611, 186593, 128286, 422979",
+- "Quelques TP": "166700, 287807, 224163, 142769, 183960, 311408, 225829, 336600, 180035, 126228"
+
+Note :
+    Dû a un bugg avec pip freeze et la version 20.1, le fichier requirements.txt est généré avec la commande :
+        pip list --format=freeze > requirements.txt

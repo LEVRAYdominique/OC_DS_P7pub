@@ -3,23 +3,29 @@
 Projet n°7 - Implémentez un modèle de scoring
 Script Python réalisé par Dominique LEVRAY en Juillet/Août 2024
 ========================================================================
-Pour exécuter cette API localement : uvicorn LEVRAY_Dominique_1_API_072024:app --reload
+Pour exécuter cette API localement : uvicorn levray_dominique_1_api_072024:app --reload
 '''
 #pylint: disable=line-too-long
+#pylint: disable=invalid-name
+#pylint: disable=broad-exception-raised
+#pylint: disable=trailing-whitespace
 
 # Importation des modules
-import  os
-import  time
-import  re
+from pydantic.dataclasses import dataclass      # à utiliser à la place de dataclasses avec FastAPI
+
+# Les modules standards datascience
 import  numpy       as      np
 import  pandas      as      pd
 
 # FastAPI
 from    fastapi     import  FastAPI, Path, HTTPException
-from    fastapi     import  UploadFile
+#from    fastapi     import  UploadFile
+
+# sklearn.metrics
+from    sklearn.metrics             import confusion_matrix
 
 # BytesIO
-from    io          import BytesIO
+#from    io          import BytesIO
 
 # mlflow
 import mlflow                                               # MlFlow
@@ -27,85 +33,161 @@ import mlflow                                               # MlFlow
 print("\n   ")
 
 # Defini quelques constantes des noms de fichier
-ZIP_FULL_DATA_FILENAME       = "produced/full_data.zip"         # Fichier de données complet pré-processé
-ZIP_TRAIN_DATA_FILENAME      = "produced/train_data.zip"        # Fichier de données d'entrainement partiel (colonnes SK_ID_CURR et TARGET)
-ZIP_TEST_DATA_FILENAME       = "produced/test_data.zip"         # Fichier de données de test partiel (colonnes SK_ID_CURR et TARGET)
-ZIP_SHAP_IMPORTANCE_FILENAME = "produced/shap_importance.zip"   # Fichier contenant la liste des colonnes importantes (selon SHAP)
+ZIP_TEST_DATA_FILENAME = "test_data.zip"                 # fichier contenant les données de test
+MLFLOW_MODEL_FOLDER    = "mlflow_model"                  # fichier contenant le modèle pré-entraîné
 
 # Definition de constante
-BEST_THRESHOLD = 0.28                                           # Seuil d'appartenance à la TARGET 1 (lu sur la courbe PR lors de la modelisation)
+BEST_THRESHOLD = 0.28                                    # Seuil d'appartenance à la TARGET 1 (lu sur la courbe PR lors de la modelisation)
 
 # Initialisation du model (depuis le fichier sauvegardé)
-print("Chargement du modele pré-entraîné...")
-model = mlflow.sklearn.load_model("mlflow_model")   
+print("Chargement du modèle pré-entraîné...")
+model = mlflow.sklearn.load_model("mlflow_model")
 
 # Chargement des données depuis les 3 fichiers ZIP créés lors de la modélisation
-print(f"Lecture des données depuis data/{ZIP_FULL_DATA_FILENAME}")
-full_data_df  = pd.read_csv("data/"+ZIP_FULL_DATA_FILENAME,  sep=',', encoding='utf-8',compression='zip')
-print(f"\tTaille de full_data_df={full_data_df.shape}")
+print("Chargement des données de test...")
+data_df  = pd.read_csv(ZIP_TEST_DATA_FILENAME,  sep=',', encoding='utf-8',compression='zip')
 
-# print(f"Lecture des données depuis data/{ZIP_TRAIN_DATA_FILENAME}")
-# train_data_df = pd.read_csv("data/"+ZIP_TRAIN_DATA_FILENAME, sep=',', encoding='utf-8',compression='zip')
-# print(f"\tTaille de train_data_df={train_data_df.shape}")
+# Initialise des variables avec les index min et max de SK_ID_CURR
+min_SK_ID_CURR  = data_df['SK_ID_CURR'].min()
+max_SK_ID_CURR  = data_df['SK_ID_CURR'].max()
 
-# print(f"Lecture des données depuis data/{ZIP_TEST_DATA_FILENAME}")
-# test_data_df  = pd.read_csv("data/"+ZIP_TEST_DATA_FILENAME,  sep=',', encoding='utf-8',compression='zip')
-# print(f"\tTaille de test_data_df={test_data_df.shape}")
+# Prépare les données
+y = data_df['TARGET']
+X = data_df.drop(columns='TARGET')
 
-# Chargement des données depuis le fichier ZIP sur les colonnes importantes créés lors de la modélisation
-print(f"Lecture des données depuis data/{ZIP_SHAP_IMPORTANCE_FILENAME}")
-shap_importante_df  = pd.read_csv("data/"+ZIP_SHAP_IMPORTANCE_FILENAME,  sep=',', encoding='utf-8',compression='zip')
-print(f"\tTaille de full_data_df={shap_importante_df.shape}")
+# Faire la prédiction
+y_pred_proba   = model.predict_proba(X)[:, 1]
+y_pred         = np.where(y_pred_proba>=BEST_THRESHOLD, 1, 0)
+merged_data_df = pd.concat([data_df, pd.DataFrame(y_pred_proba, columns=['y_pred_proba']), pd.DataFrame(y_pred, columns=['y_pred'])], axis=1)
 
-colonnes_toutes = full_data_df.columns
-colonnes_shap   = shap_importante_df['col_name'].to_list
-min_SK_ID_CURR  = full_data_df['SK_ID_CURR'].min()
-max_SK_ID_CURR  = full_data_df['SK_ID_CURR'].max()
+# Calculer la matrice de confusion
+tn, fp, fn, tp = confusion_matrix(y, y_pred).ravel()
 
 # Initialisation de l'instance FastAPI
+print("\nInitialisation de l'API...")
 app = FastAPI(debug=True)
 
-@app.get("/client/{SK_ID_CURR}") 
-def get_client(SK_ID_CURR: int = Path(ge=min_SK_ID_CURR, le=max_SK_ID_CURR)) -> dict:
-    '''
-    Obtenir les valeurs des 25 features les plus importantes (selon SHAP) pour le client qui a contracté le crédit dont l'id est SK_ID_CURR
-    '''
-    part_data_df = full_data_df[full_data_df['SK_ID_CURR']==SK_ID_CURR]
+@dataclass
+class Client_credit:
+    """Class representant un client d'un crédit"""
+    SK_ID_CURR:                                     int             # l'index du credit
+    FLAG_OWN_REALTY:                                int             # Si le client est propriétaire de son logement
+    FLAG_OWN_CAR:                                   int             # Si le client a et est propriétaire d'une voiture
+    OWN_CAR_AGE:                                    float           # Age de la voiture
+    PAYMENT_RATE:                                   float           # Pourcentage du montant du crédit remboursé annuellement [pré-processing]
+    NAME_INCOME_TYPE_Working:                       bool            # True si les revennus du client proviennent d'un salaire
+    NAME_INCOME_TYPE_Commercialassociate:           bool            # True si les revennus du client sont des commissions (commerce)
+    NAME_EDUCATION_TYPE_Highereducation:            bool            # True si le client a fait des études supérieurs
+    NAME_EDUCATION_TYPE_Secondarysecondaryspecial:  bool            # True si le client a fini les études secondaires
+    NAME_FAMILY_STATUS_Married:                     bool            # True si le client est marié
+    NAME_FAMILY_STATUS_Singlenotmarried:            bool            # True si le client est célibataire
+    PRED_PROBA:                                     float = 0       # probabilité que le client ait des retards de paiement
+    PRED_TARGET:                                    int = 0         # TARGET predite et calculé à partir de PRED_PROBA
+    TARGET:                                         bool = 0        # 0 si le client a des retards de paiement => crédit à rejeter
+
+@dataclass
+class Client_new_credit:
+    """Class representant un client pour un nouveau crédit (même structure que Client_credit mais sans TARGET ni prédiction)"""
+    SK_ID_CURR:                                     int             # l'index du crédit
+    FLAG_OWN_REALTY:                                int             # Si le client est propriétaire de son logement
+    FLAG_OWN_CAR:                                   int             # Si le client a et est propriétaire d'une voiture
+    OWN_CAR_AGE:                                    float           # Age de la voiture
+    PAYMENT_RATE:                                   float           # Pourcentage du montant du crédit remboursé annuellement [pré-processing]
+    NAME_INCOME_TYPE_Working:                       bool            # True si les revennus du client proviennent d'un salaire
+    NAME_INCOME_TYPE_Commercialassociate:           bool            # True si les revennus du client sont des commissions (commerce)
+    NAME_EDUCATION_TYPE_Highereducation:            bool            # True si le client a fait des études supérieurs
+    NAME_EDUCATION_TYPE_Secondarysecondaryspecial:  bool            # True si le client a fini les études secondaires
+    NAME_FAMILY_STATUS_Married:                     bool            # True si le client est marié
+    NAME_FAMILY_STATUS_Singlenotmarried:            bool            # True si le client est célibataire
+
+#--------------------------------------------------------------------------------------------------------------------------------
+
+def Client_credit_from_data(client_data):
+    """Obtient un Client_credit à partir d'un SK_ID_CURR"""
+
+    the_client=Client_credit(SK_ID_CURR                                      = client_data['SK_ID_CURR'],
+                             FLAG_OWN_REALTY                                 = client_data['FLAG_OWN_REALTY'],
+                             FLAG_OWN_CAR                                    = client_data['FLAG_OWN_CAR'],
+                             OWN_CAR_AGE                                     = client_data['OWN_CAR_AGE'],
+                             PAYMENT_RATE                                    = client_data['PAYMENT_RATE'],
+                             NAME_INCOME_TYPE_Working                        = client_data['NAME_INCOME_TYPE_Working'],
+                             NAME_INCOME_TYPE_Commercialassociate            = client_data['NAME_INCOME_TYPE_Commercialassociate'],
+                             NAME_EDUCATION_TYPE_Highereducation             = client_data['NAME_EDUCATION_TYPE_Highereducation'],
+                             NAME_EDUCATION_TYPE_Secondarysecondaryspecial   = client_data['NAME_EDUCATION_TYPE_Secondarysecondaryspecial'],
+                             NAME_FAMILY_STATUS_Married                      = client_data['NAME_FAMILY_STATUS_Married'],
+                             NAME_FAMILY_STATUS_Singlenotmarried             = client_data['NAME_FAMILY_STATUS_Singlenotmarried'],
+                             PRED_PROBA                                      = client_data['y_pred_proba'],
+                             PRED_TARGET                                     = client_data['y_pred'],
+                             TARGET                                          = client_data['TARGET']
+                            )
+    return the_client
+
+#--------------------------------------------------------------------------------------------------------------------------------
+
+@app.get("/get_client/{SK_ID_CURR}")
+def get_client_by_ID(SK_ID_CURR: int = Path(ge=min_SK_ID_CURR, le=max_SK_ID_CURR)) -> Client_credit:
+    '''Obtenir quelques valeurs importantes pour le client qui a contracté le crédit dont l'id est SK_ID_CURR'''
+    
+    # Commence par vérifier que l'ID est valide !
+    part_data_df = merged_data_df[merged_data_df['SK_ID_CURR']==SK_ID_CURR]
     if part_data_df.shape[0]==0:
         raise HTTPException(status_code=404, detail="SK_ID_CURR non trouvé !")
-    return {"message" : part_data_df.to_json()}
 
-# def load_model_from_mlflow():
-#     '''
-#     Défini une fonction pour charger le model sauvegardé par mlflow
-#     '''
-#     #mlflow_run_id               = "bbe7532cec3740bbbfe9c28c84a78b8f"
-#     #run_relative_path_to_model  = "mlflow_model"
-#     #model_uri                   = f"runs:/{run_id}/{run_relative_path_to_model}"
-#     #model                       = mlflow.sklearn.load_model(f"runs:/{mlflow_run_id}/{run_relative_path_to_model}")
-#     return mlflow.sklearn.load_model("mlflow_model")
+    # Renvoi les informations pour le client en question
+    return Client_credit_from_data(part_data_df)
 
-# @app.post("/predict")                   # Encapsulation des requêtes POST sur "/predict"
-# async def predict(file: UploadFile):
-#     '''
-#     Fonction asynchrone pour renvoyer une prédiction depuis un fichier de donnée fourni via POST
-#     '''
-#     # Initialise un dataframe avec le fichier .csv envoyé via POST
-#     data_file=await file.read()             # Lecture des données binaire du fichier
-#     bio      =BytesIO(data_file)            # Lecture en streaming du fichier (sans sauvegarde préalable)
-#     data_df  =pd.read_csv(bio)              # Chargement d'un dataframe à partir du fichier lu en streaming
-    
-#     # Obtention des prédictions
-#     y_pred_proba = model.predict_proba(data_df)[:, 1]               # Sous forme de probabilité
-#     y_pred       = np.where(y_pred_proba>=BEST_THRESHOLD, 1, 0)     # Calcul de la classe d'appartenance (seuil=best_threshold)
-#     #return {"message":f"data_file lu + bio + data_df={data_df.shape} + len(y_pred)={len(y_pred)}"}
-    
-#     return {"predictions": f"50 premières valeurs{y_pred[:50]}"}
+#--------------------------------------------------------------------------------------------------------------------------------
 
-# @app.get("/")                       # Décorateur pour encapsuler les requêtes GET sur "/"
-# def hello_world():                        # La fonction à exécuter en réponse au GET
-#     '''
-#     Fonction pour renvoyer hello_world en GET et vérifier que le code fonctionne
-#     '''
-#     return {"message":"Hello world !"}   # Renvoi de données sous forme de dictionnaire
+def Client_credit_to_new_data(client_data: Client_new_credit):
+    """Obtient un dataframe d'une ligne à partir de data_df et d'un Client_credit contenant des informations modifiées"""
 
+    # Construit un dataframe d'une ligne
+    new_data_df = merged_data_df[merged_data_df['SK_ID_CURR']==client_data.SK_ID_CURR].copy()   # Copy car on va modifier la donnée
+
+    # Transfert les nouvelles données dans le dataframe
+    new_data_df['FLAG_OWN_REALTY']                               = client_data.FLAG_OWN_REALTY
+    new_data_df['FLAG_OWN_CAR']                                  = client_data.FLAG_OWN_CAR
+    new_data_df['OWN_CAR_AGE']                                   = client_data.OWN_CAR_AGE
+    new_data_df['PAYMENT_RATE']                                  = client_data.PAYMENT_RATE
+    new_data_df['NAME_INCOME_TYPE_Working']                      = client_data.NAME_INCOME_TYPE_Working
+    new_data_df['NAME_INCOME_TYPE_Commercialassociate']          = client_data.NAME_INCOME_TYPE_Commercialassociate
+    new_data_df['NAME_EDUCATION_TYPE_Highereducation']           = client_data.NAME_EDUCATION_TYPE_Highereducation
+    new_data_df['NAME_EDUCATION_TYPE_Secondarysecondaryspecial'] = client_data.NAME_EDUCATION_TYPE_Secondarysecondaryspecial
+    new_data_df['NAME_FAMILY_STATUS_Married']                    = client_data.NAME_FAMILY_STATUS_Married
+    new_data_df['NAME_FAMILY_STATUS_Singlenotmarried']           = client_data.NAME_FAMILY_STATUS_Singlenotmarried
+
+    # il faut recalculer la prédiction pour le cas où des valeurs aient changées
+    new_X       = new_data_df.drop(columns=['TARGET', 'y_pred_proba', 'y_pred'])
+    new_y_proba = model.predict_proba(new_X)[:, 1][0]
+    new_y_pred  = int(np.where(new_y_proba>=BEST_THRESHOLD, 1, 0))
+
+    # et transférer ces nouvelles prédictions dans le dataframe d'une ligne
+    new_data_df['y_pred_proba'] = new_y_proba
+    new_data_df['y_pred']       = new_y_pred
+
+    return new_data_df
+
+#--------------------------------------------------------------------------------------------------------------------------------
+
+@app.post("/post_client/{Client_new_credit}")
+def calcul_nouveau_credit(new_client: Client_new_credit) -> Client_credit:
+    '''Recalculer les prédictions pour de nouvelles valeurs d'un client/crédit existant'''
+
+    # Commencer par vérifier que l'ID est valide !
+    part_data_df = data_df[data_df['SK_ID_CURR']==new_client.SK_ID_CURR]
+    if part_data_df.shape[0]==0:
+        raise HTTPException(status_code=404, detail="SK_ID_CURR non trouvé !")
+
+    return Client_credit_from_data(Client_credit_to_new_data(new_client))
+
+#--------------------------------------------------------------------------------------------------------------------------------
+
+@app.get("/matrice_confusion") 
+def matrice_confusion() -> dict:
+    '''Obtenir la matrice de confusion pour toutes les données de test + quelques identifiant choisi aléatoirement pour chaque catégorie'''
+    return {"Matrice de confusion": f"TN={tn} - FN={fn} - FP={fp} - TP={tp}",
+            "Quelques TN":          ", ".join(map(str, merged_data_df[(merged_data_df['y_pred']==1) & (merged_data_df['TARGET']==0)]['SK_ID_CURR'].sample(10).to_list())),
+            "Quelques FN":          ", ".join(map(str, merged_data_df[(merged_data_df['y_pred']==0) & (merged_data_df['TARGET']==1)]['SK_ID_CURR'].sample(10).to_list())),
+            "Quelques FP":          ", ".join(map(str, merged_data_df[(merged_data_df['y_pred']==0) & (merged_data_df['TARGET']==0)]['SK_ID_CURR'].sample(10).to_list())),
+            "Quelques TP":          ", ".join(map(str, merged_data_df[(merged_data_df['y_pred']==1) & (merged_data_df['TARGET']==1)]['SK_ID_CURR'].sample(10).to_list()))
+           }
