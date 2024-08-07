@@ -4,6 +4,8 @@ Projet n°7 - Implémentez un modèle de scoring
 Script Python réalisé par Dominique LEVRAY en Juillet/Août 2024
 ========================================================================
 Pour exécuter cette API localement : uvicorn levray_dominique_1_api_072024:app --reload
+Pour tester cette API avec Swagger UI sur heroku : 
+    https://oc-projet-7-c21cbfffa8fb.herokuapp.com/docs
 '''
 #pylint: disable=line-too-long
 #pylint: disable=invalid-name
@@ -11,21 +13,19 @@ Pour exécuter cette API localement : uvicorn levray_dominique_1_api_072024:app 
 #pylint: disable=trailing-whitespace
 
 # Importation des modules
-from pydantic.dataclasses import dataclass      # à utiliser à la place de dataclasses avec FastAPI
+from pydantic.dataclasses   import dataclass      # à utiliser à la place de dataclasses avec FastAPI
 
 # Les modules standards datascience
-import  numpy       as      np
-import  pandas      as      pd
+import  numpy               as      np
+import  pandas              as      pd
 
 # FastAPI
-from    fastapi     import  FastAPI, Path, HTTPException
-#from    fastapi     import  UploadFile
+from    fastapi             import  FastAPI
+from    fastapi             import  Path
+from    fastapi             import  HTTPException
 
 # sklearn.metrics
-from    sklearn.metrics             import confusion_matrix
-
-# BytesIO
-#from    io          import BytesIO
+from    sklearn.metrics     import confusion_matrix
 
 # mlflow
 import mlflow                                               # MlFlow
@@ -45,23 +45,26 @@ model = mlflow.sklearn.load_model("mlflow_model")
 
 # Chargement des données depuis les 3 fichiers ZIP créés lors de la modélisation
 print("Chargement des données de test...")
-data_df  = pd.read_csv(ZIP_TEST_DATA_FILENAME,  sep=',', encoding='utf-8',compression='zip')
+temp_df  = pd.read_csv(ZIP_TEST_DATA_FILENAME,  sep=',', encoding='utf-8',compression='zip')
 
 # Initialise des variables avec les index min et max de SK_ID_CURR
-min_SK_ID_CURR  = data_df['SK_ID_CURR'].min()
-max_SK_ID_CURR  = data_df['SK_ID_CURR'].max()
+min_SK_ID_CURR  = temp_df['SK_ID_CURR'].min()
+max_SK_ID_CURR  = temp_df['SK_ID_CURR'].max()
 
 # Prépare les données
-y = data_df['TARGET']
-X = data_df.drop(columns='TARGET')
+y = temp_df['TARGET']
+X = temp_df.drop(columns='TARGET')
 
 # Faire la prédiction
 y_pred_proba   = model.predict_proba(X)[:, 1]
 y_pred         = np.where(y_pred_proba>=BEST_THRESHOLD, 1, 0)
-merged_data_df = pd.concat([data_df, pd.DataFrame(y_pred_proba, columns=['y_pred_proba']), pd.DataFrame(y_pred, columns=['y_pred'])], axis=1)
+merged_data_df = pd.concat([temp_df, pd.DataFrame(y_pred_proba, columns=['y_pred_proba']), pd.DataFrame(y_pred, columns=['y_pred'])], axis=1)
 
 # Calculer la matrice de confusion
 tn, fp, fn, tp = confusion_matrix(y, y_pred).ravel()
+
+# libère temp_df => force le garbage collector
+del temp_df
 
 # Initialisation de l'instance FastAPI
 print("\nInitialisation de l'API...")
@@ -174,7 +177,7 @@ def calcul_nouveau_credit(new_client: Client_new_credit) -> Client_credit:
     '''Recalculer les prédictions pour de nouvelles valeurs d'un client/crédit existant'''
 
     # Commencer par vérifier que l'ID est valide !
-    part_data_df = data_df[data_df['SK_ID_CURR']==new_client.SK_ID_CURR]
+    part_data_df = merged_data_df[merged_data_df['SK_ID_CURR']==new_client.SK_ID_CURR]
     if part_data_df.shape[0]==0:
         raise HTTPException(status_code=404, detail="SK_ID_CURR non trouvé !")
 
