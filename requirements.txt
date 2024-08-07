@@ -339,7 +339,7 @@ ruamel.yaml==0.17.21
 ruamel-yaml-conda==0.17.21
 s3fs==2024.3.1
 scikit-image==0.23.2
-scikit-learn==1.5.1
+scikit-learn==1.5.0
 scipy==1.11.4
 Scrapy==2.11.1
 seaborn==0.13.2
