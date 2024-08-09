@@ -25,11 +25,9 @@ Ce dépôt contient la partie publique de ce projet et comprend :
 
 
 **Notes concernant les pré-requis heroku:**
-    Dû a un bugg avec pip freeze et la version 20.1, le fichier requirements.txt est généré avec la commande :
-        pip list --format=freeze > requirements.txt
-
-    L'API est conçu pour fonctionner sur heroku qui est une plateforme linux
-        => suppression à la main de requirements.txt des packages inutiles suivant :
-            pywin32 
+    Génération du fichier requirements depuis un wsl 2 - ubuntu 24.04 lts
+        pip freeze > requirements.txt
+    
+    Utilisation d'Heroku-24 stack (à base de ubuntu 24.04)
 
     Ajout d'un fichier runtime.txt pour spécifier la version de Pythony
