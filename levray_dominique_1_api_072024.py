@@ -37,7 +37,7 @@ ZIP_TEST_DATA_FILENAME = "test_data.zip"                 # fichier contenant les
 MLFLOW_MODEL_FOLDER    = "mlflow_model"                  # fichier contenant le modèle pré-entraîné
 
 # Definition de constante
-BEST_THRESHOLD = 0.28                                    # Seuil d'appartenance à la TARGET 1 (lu sur la courbe PR lors de la modelisation)
+BEST_THRESHOLD = 0.27                                    # Seuil d'appartenance à la TARGET 1 (lu sur la courbe PR lors de la modelisation)
 
 # Initialisation du model (depuis le fichier sauvegardé)
 print("Chargement du modèle pré-entraîné...")
