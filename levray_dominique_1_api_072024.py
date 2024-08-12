@@ -4,17 +4,17 @@ Projet n°7 - Implémentez un modèle de scoring
 Script Python réalisé par Dominique LEVRAY en Juillet/Août 2024
 ========================================================================
 Pour exécuter cette API localement : uvicorn levray_dominique_1_api_072024:app --reload
-Pour tester cette API avec Swagger UI sur heroku : 
+Pour tester cette API avec Swagger UI sur heroku :
     https://oc-projet-7-c21cbfffa8fb.herokuapp.com/docs
 '''
-#pylint: disable=line-too-long
-#pylint: disable=invalid-name
-#pylint: disable=broad-exception-raised
-#pylint: disable=trailing-whitespace
+# pylint: disable=line-too-long
+# pylint: disable=invalid-name
+# pylint: disable=broad-exception-raised
+# pylint: disable=trailing-whitespace
 
-#-------------------------------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------------------------------------
 # Importation des modules
-#-------------------------------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------------------------------------
 
 # à utiliser à la place de dataclasses avec FastAPI
 from pydantic.dataclasses   import dataclass
@@ -34,9 +34,9 @@ from    sklearn.metrics     import confusion_matrix
 # mlflow
 import mlflow                                               # MlFlow
 
-#-------------------------------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------------------------------------
 # Définition des constantes
-#-------------------------------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------------------------------------
 
 # Defini quelques constantes des noms de fichier
 ZIP_TEST_DATA_FILENAME = "test_data.zip"                 # fichier contenant les données de test
@@ -45,9 +45,10 @@ MLFLOW_MODEL_FOLDER    = "mlflow_model"                  # fichier contenant le 
 # Definition de constante
 BEST_THRESHOLD = 0.27                                    # Seuil d'appartenance à la TARGET 1 (lu sur la courbe PR lors de la modelisation)
 
-#-------------------------------------------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------------------------------------------
 # Définition des classes de données
-#-------------------------------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------------------------------------
 
 @dataclass
 class Client_credit:
@@ -71,7 +72,7 @@ class Client_credit:
         """Obtient un dataframe d'une ligne à partir de data_df et d'un Client_credit contenant des informations modifiées"""
 
         # Construit un dataframe d'une ligne
-        new_data_df = merged_data_df[merged_data_df['SK_ID_CURR']==self.SK_ID_CURR].copy()   # Copy car on va modifier la donnée
+        new_data_df = merged_data_df[merged_data_df['SK_ID_CURR'] == self.SK_ID_CURR].copy()   # Copy car on va modifier la donnée
 
         # Transfert les nouvelles données dans le dataframe
         new_data_df['FLAG_OWN_REALTY']          = self.FLAG_OWN_REALTY
@@ -88,7 +89,7 @@ class Client_credit:
         # il faut recalculer la prédiction pour le cas où des valeurs aient changées
         new_X       = new_data_df.drop(columns=['TARGET', 'y_pred_proba', 'y_pred'])
         new_y_proba = model.predict_proba(new_X)[:, 1][0]
-        new_y_pred  = int(np.where(new_y_proba>=BEST_THRESHOLD, 1, 0))
+        new_y_pred  = int(np.where(new_y_proba >= BEST_THRESHOLD, 1, 0))
 
         # et transférer ces nouvelles prédictions dans le dataframe d'une ligne
         new_data_df['y_pred_proba'] = new_y_proba
@@ -96,7 +97,8 @@ class Client_credit:
 
         return new_data_df
 
-#--------------------------------------------------------
+
+# --------------------------------------------------------
 
 @dataclass
 class Client_new_credit:
@@ -113,36 +115,36 @@ class Client_new_credit:
     EXT_SOURCE_2_x:             float           # score from external data source
     EXT_SOURCE_3_x:             float           # score from external data source
 
-#-------------------------------------------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------------------------------------------
 # Définition des fonctions utilitaires
-#-------------------------------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------------------------------------
 
 def Client_credit_from_data(client_data) -> Client_credit:
     """Obtient un Client_credit à partir d'un SK_ID_CURR"""
 
-    the_client=Client_credit(SK_ID_CURR               = client_data['SK_ID_CURR'],
-                             FLAG_OWN_REALTY          = client_data['FLAG_OWN_REALTY'],
-                             FLAG_OWN_CAR             = client_data['FLAG_OWN_CAR'],
-                             OWN_CAR_AGE              = client_data['OWN_CAR_AGE'],
-                             NAME_INCOME_TYPE_Working = client_data['NAME_INCOME_TYPE_Working'],
-                             DAYS_EMPLOYED            = client_data['DAYS_EMPLOYED'],
-                             AMT_GOODS_PRICE          = client_data['AMT_GOODS_PRICE'],
-                             AMT_CREDIT               = client_data['AMT_CREDIT'],
-                             EXT_SOURCE_1_x           = client_data['EXT_SOURCE_1_x'],
-                             EXT_SOURCE_2_x           = client_data['EXT_SOURCE_2_x'],
-                             EXT_SOURCE_3_x           = client_data['EXT_SOURCE_3_x'],
-                             PRED_PROBA               = client_data['y_pred_proba'],
-                             PRED_TARGET              = client_data['y_pred'],
-                             TARGET                   = client_data['TARGET']
-                            )
-    return the_client
+    return Client_credit(SK_ID_CURR               = client_data['SK_ID_CURR'],
+                         FLAG_OWN_REALTY          = client_data['FLAG_OWN_REALTY'],
+                         FLAG_OWN_CAR             = client_data['FLAG_OWN_CAR'],
+                         OWN_CAR_AGE              = client_data['OWN_CAR_AGE'],
+                         NAME_INCOME_TYPE_Working = client_data['NAME_INCOME_TYPE_Working'],
+                         DAYS_EMPLOYED            = client_data['DAYS_EMPLOYED'],
+                         AMT_GOODS_PRICE          = client_data['AMT_GOODS_PRICE'],
+                         AMT_CREDIT               = client_data['AMT_CREDIT'],
+                         EXT_SOURCE_1_x           = client_data['EXT_SOURCE_1_x'],
+                         EXT_SOURCE_2_x           = client_data['EXT_SOURCE_2_x'],
+                         EXT_SOURCE_3_x           = client_data['EXT_SOURCE_3_x'],
+                         PRED_PROBA               = client_data['y_pred_proba'],
+                         PRED_TARGET              = client_data['y_pred'],
+                         TARGET                   = client_data['TARGET'])
 
-#-------------------------------------------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------------------------------------------
 # La fonction MAIN
 # Note : ce fichier est prévu pour être exécuté avec uvicorn  : il n'y a donc pas le traditionnel
 #   if __name__ == "__main__":
 #           main()
-#-------------------------------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------------------------------------
 
 print("\n   ")
 
@@ -152,7 +154,7 @@ model = mlflow.sklearn.load_model("mlflow_model")
 
 # Chargement des données depuis les 3 fichiers ZIP créés lors de la modélisation
 print("Chargement des données de test...")
-temp_df  = pd.read_csv(ZIP_TEST_DATA_FILENAME,  sep=',', encoding='utf-8',compression='zip')
+temp_df  = pd.read_csv(ZIP_TEST_DATA_FILENAME, sep=',', encoding='utf-8', compression='zip')
 
 # Initialise des variables avec les index min et max de SK_ID_CURR
 min_SK_ID_CURR  = temp_df['SK_ID_CURR'].min()
@@ -164,7 +166,7 @@ X = temp_df.drop(columns='TARGET')
 
 # Faire la prédiction
 y_pred_proba   = model.predict_proba(X)[:, 1]
-y_pred         = np.where(y_pred_proba>=BEST_THRESHOLD, 1, 0)
+y_pred         = np.where(y_pred_proba >= BEST_THRESHOLD, 1, 0)
 merged_data_df = pd.concat([temp_df, pd.DataFrame(y_pred_proba, columns=['y_pred_proba']), pd.DataFrame(y_pred, columns=['y_pred'])], axis=1)
 
 # Calculer la matrice de confusion
@@ -179,44 +181,46 @@ del y_pred
 print("\nInitialisation de l'API...")
 app = FastAPI(debug=True)
 
-#-------------------------------------------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------------------------------------------
 # Définition des fonctions d'échanges HTTPS
 # Note : la structure de FastAPI impose de les déclarer après la partie main
-#-------------------------------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------------------------------------
 
 @app.get("/get_client/{SK_ID_CURR}")
 def get_client_by_ID(SK_ID_CURR: int = Path(ge=min_SK_ID_CURR, le=max_SK_ID_CURR)) -> Client_credit:
     '''Obtenir quelques valeurs importantes pour le client qui a contracté le crédit dont l'id est SK_ID_CURR'''
-    
+
     # Commence par vérifier que l'ID est valide !
-    part_data_df = merged_data_df[merged_data_df['SK_ID_CURR']==SK_ID_CURR]
-    if part_data_df.shape[0]==0:
+    part_data_df = merged_data_df[merged_data_df['SK_ID_CURR'] == SK_ID_CURR]
+    if part_data_df.shape[0] == 0:
         raise HTTPException(status_code=404, detail="SK_ID_CURR non trouvé !")
 
     # Renvoi les informations pour le client en question
     return Client_credit_from_data(part_data_df)
 
-#--------------------------------------------------------
+
+# --------------------------------------------------------
 
 @app.post("/post_client/{Client_new_credit}")
 def calcul_nouveau_credit(new_client: Client_new_credit) -> Client_credit:
     '''Recalculer les prédictions pour de nouvelles valeurs d'un client/crédit existant'''
 
     # Commencer par vérifier que l'ID est valide !
-    part_data_df = merged_data_df[merged_data_df['SK_ID_CURR']==new_client.SK_ID_CURR]
-    if part_data_df.shape[0]==0:
+    part_data_df = merged_data_df[merged_data_df['SK_ID_CURR'] == new_client.SK_ID_CURR]
+    if part_data_df.shape[0] == 0:
         raise HTTPException(status_code=404, detail="SK_ID_CURR non trouvé !")
 
     return Client_credit_from_data(new_client.to_new_data())
 
-#--------------------------------------------------------
 
-@app.get("/matrice_confusion") 
+# --------------------------------------------------------
+
+@app.get("/matrice_confusion")
 def matrice_confusion() -> dict:
     '''Obtenir la matrice de confusion pour toutes les données de test + quelques identifiant choisi aléatoirement pour chaque catégorie'''
     return {"Matrice de confusion": f"TN={tn} - FN={fn} - FP={fp} - TP={tp}",
-            "Quelques TN": ", ".join(map(str, merged_data_df[(merged_data_df['y_pred']==1) & (merged_data_df['TARGET']==0)]['SK_ID_CURR'].sample(10).to_list())),
-            "Quelques FN": ", ".join(map(str, merged_data_df[(merged_data_df['y_pred']==0) & (merged_data_df['TARGET']==1)]['SK_ID_CURR'].sample(10).to_list())),
-            "Quelques FP": ", ".join(map(str, merged_data_df[(merged_data_df['y_pred']==0) & (merged_data_df['TARGET']==0)]['SK_ID_CURR'].sample(10).to_list())),
-            "Quelques TP": ", ".join(map(str, merged_data_df[(merged_data_df['y_pred']==1) & (merged_data_df['TARGET']==1)]['SK_ID_CURR'].sample(10).to_list()))
-           }
+            "Quelques TN": ", ".join(map(str, merged_data_df[(merged_data_df['y_pred'] == 1) & (merged_data_df['TARGET'] == 0)]['SK_ID_CURR'].sample(10).to_list())),
+            "Quelques FN": ", ".join(map(str, merged_data_df[(merged_data_df['y_pred'] == 0) & (merged_data_df['TARGET'] == 1)]['SK_ID_CURR'].sample(10).to_list())),
+            "Quelques FP": ", ".join(map(str, merged_data_df[(merged_data_df['y_pred'] == 0) & (merged_data_df['TARGET'] == 0)]['SK_ID_CURR'].sample(10).to_list())),
+            "Quelques TP": ", ".join(map(str, merged_data_df[(merged_data_df['y_pred'] == 1) & (merged_data_df['TARGET'] == 1)]['SK_ID_CURR'].sample(10).to_list()))}

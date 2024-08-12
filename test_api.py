@@ -6,23 +6,23 @@ Script Python réalisé par Dominique LEVRAY en Juillet/Août 2024
 Ce fichier contient un test de l'API déployée sur HEROKU
 Pour exécuter ce fichier : pytest
 '''
-#pylint: disable=line-too-long
-#pylint: disable=invalid-name
-#pylint: disable=broad-exception-raised
-#pylint: disable=trailing-whitespace
-#pylint: disable=unused-import
+# pylint: disable=line-too-long
+# pylint: disable=invalid-name
+# pylint: disable=broad-exception-raised
+# pylint: disable=trailing-whitespace
+# pylint: disable=unused-import
 
-#-------------------------------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------------------------------------
 # Importation des modules
-#-------------------------------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------------------------------------
 
-import  json
-import  requests
-import  pytest
+import json
+import requests
+import pytest       # noqa: F401
 
-#-------------------------------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------------------------------------
 # Définition des constantes
-#-------------------------------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------------------------------------
 
 API_BASE_URL  = "https://oc-projet-7-c21cbfffa8fb.herokuapp.com"    # URL de base de l'API sur heroku
 API_MATRICE   = "/matrice_confusion"
@@ -69,9 +69,9 @@ BAD_DICT_FORMAT = {"SK_ID_CURR": 100043,
                    "EXT_SOURCE_3_x": 0.7544061731797895}
 
 
-#-------------------------------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------------------------------------
 # Définition des fonctions de test
-#-------------------------------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------------------------------------
 
 def test_matrice():
     """Test si le serveur a renvoyé une matrice correcte"""
@@ -89,7 +89,7 @@ def test_matrice():
 
     assert valeurs is not None, "Le serveur doit renvoyer une Matrice de confusion"
 
-    valeurs_list = valeurs.split(" - ",4)
+    valeurs_list = valeurs.split(" - ", 4)
 
     assert len(valeurs_list) == 4, "La matrice de confusion doit contenir 4 valeurs"
 
@@ -108,7 +108,7 @@ def test_matrice():
     # Vérifie qu'on a bien trouvé l'entrée "Quelques FN"
     some_FN = dict_obj.get("Quelques FN")
     assert some_FN is not None, "Le serveur doit renvoyer des identifiants FN"
-    
+
     some_FN = some_FN.split(", ")
     assert len(some_FN) == 10, "Quelques FN devrait contenir 10 valeurs"
 
@@ -125,7 +125,8 @@ def test_matrice():
     some_TP = some_TP.split(", ")
     assert len(some_TP) == 10, "Quelques TP devrait contenir 10 valeurs"
 
-#----------------------------------------------------------
+
+# ----------------------------------------------------------
 
 def test_get():
     """Test si le serveur renvoi un client correct"""
@@ -145,7 +146,8 @@ def test_get():
     dict_obj = json.loads(result.content)
     assert len(dict_obj) == 14, "Le client retourné par le serveur doit contenir 14 valeurs"
 
-#----------------------------------------------------------
+
+# ----------------------------------------------------------
 
 def test_post():
     """Test si le serveur renvoi un client correct suite à un post"""
@@ -165,12 +167,13 @@ def test_post():
     dict_obj = json.loads(result.content)
     assert len(dict_obj) == 14, "Le client retourné par le serveur doit contenir 14 valeurs"
 
-#-------------------------------------------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------------------------------------------
 # La fonction MAIN
 # Note : ce fichier est prévu pour être exécuté avec pytest : il n'y a donc pas le traditionnel
 #   if __name__ == "__main__":
 #           main()
-#-------------------------------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------------------------------------
 
 # Test de la matrice de confusion
 test_matrice()

@@ -4,15 +4,15 @@ Projet n°7 - Implémentez un modèle de scoring
 Script Python réalisé par Dominique LEVRAY en Juillet/Août 2024
 ========================================================================
 Module pour retraiter tous les petits fichiers de données en un
-dataframe unique exploitable par l'API 
+dataframe unique exploitable par l'API
 + faire le preprocessing des données en :
 - corrigeant des problèmes de valeurs vides ou abérrantes
 - créant des valeurs métiers
 - créant des variables polynomiales
 '''
-#pylint: disable=line-too-long
-#pylint: disable=f-string-without-interpolation
-#pylint: disable=broad-exception-caught
+# pylint: disable=line-too-long
+# pylint: disable=f-string-without-interpolation
+# pylint: disable=broad-exception-caught
 
 import  re
 import  numpy                       as np
@@ -22,55 +22,51 @@ import  category_encoders           as ce
 from    sklearn.preprocessing       import LabelEncoder
 from    sklearn.preprocessing       import PolynomialFeatures
 
-###############################################################################################################
+
+# ##############################################################################################################
 # Définir quelques fonctions utilitaires
-###############################################################################################################
+# ##############################################################################################################
 
 def read_csv_file(filename):
-    """ 
-     Cree un dataframe depuis un fichier .csv
-    """
+    """Cree un dataframe depuis un fichier .csv"""
     print(f"\nLecture du fichier csv : {filename}")
     try:
-        data_df = pd.read_csv(filename,             # Nom du fichier
-                            sep      = ',',         # Séparateur virgule
-                            encoding = 'utf-8',     # Encodage UTF-8
-                            )
+        data_df = pd.read_csv(filename,                # Nom du fichier
+                              sep      = ',',          # Séparateur virgule
+                              encoding = 'utf-8')      # Encodage UTF-8
+
     except Exception:
-        data_df = pd.read_csv(filename,             # Nom du fichier
-                            sep      = ',',         # Séparateur virgule
-                            encoding = 'iso-8859-1' # Change d'encodage
-                            )
+        data_df = pd.read_csv(filename,                 # Nom du fichier
+                              sep      = ',',           # Séparateur virgule
+                              encoding = 'iso-8859-1')  # Change d'encodage
 
     print(f"\tLe fichier {filename} contient {data_df.shape[0]} lignes et {data_df.shape[1]} colonnes.")
     return data_df
 
-###############################################################################################################
+
+# ##############################################################################################################
 
 def write_csv_zip_file(filename, data_df):
-    """ 
-     Cree un fichier .csv depuis un dataframe
-    """
+    """Cree un fichier .csv depuis un dataframe"""
     print(f"Ecriture du fichier csv : data/{filename}\n")
     data_df.to_csv(filename,                # Nom du fichier
                    sep=',',                 # Séparateur virgule
                    encoding = 'utf-8',      # Encodage UTF-8
                    index=False,             # N'inclus pas l'index
-                   compression='zip'
-                  )
+                   compression='zip')
 
-###############################################################################################################
+
+# ##############################################################################################################
 
 def supp_data_inutiles(df, var_id, list_id, nom_df, nom_liste):
-    ''' 
-    Supprimer les individus d'un dataframe sur un identifiant contenu dans une variable qui n'est pas présent dans une liste 
-    '''
+    '''Supprimer les individus d'un dataframe sur un identifiant contenu dans une variable qui n'est pas présent dans une liste'''
     print(f"\tSupprime les individus de {nom_df} pour lesquels l'identifiant {var_id} n'est pas présent dans {nom_liste}")
     anc_nbr_lignes = df.shape[0]
     df.drop(df[~df[var_id].isin(list_id)].index, inplace=True)
     print(f"\t\t{nom_df} contient désormais {df.shape[0]} au lieu de {anc_nbr_lignes} lignes soit {df.shape[0]-anc_nbr_lignes} lignes")
 
-###############################################################################################################
+
+# ##############################################################################################################
 
 def prepare_bureau_balance(bureau_balance_df):
     '''
@@ -85,7 +81,7 @@ def prepare_bureau_balance(bureau_balance_df):
     print("\t\tbureau_balance : Compte le nombre d'occurences par STATUS")
     col       = encoder.get_feature_names_out()[2:]                             # Récupère les noms des colonnes de status
     dict_agg  = {col[i]: 'sum' for i in range(0, len(col))}                     # Construit un dictionnaire d'aggregation (toutes les colonnes en 'sum')
-    dict_agg['MONTHS_BALANCE']='min'                                            # Ajoute l'agrégation pour MONTHS_BALANCE
+    dict_agg['MONTHS_BALANCE'] = 'min'                                          # Ajoute l'agrégation pour MONTHS_BALANCE
 
     # Compte le nombre d'occurence par STATUS
     print("\t\tbureau_balance : Groupe les occurences mensuels par crédit")
@@ -94,18 +90,20 @@ def prepare_bureau_balance(bureau_balance_df):
 
     # Crée la colonne Incident_OuiNon (Commence en additionnant les valeurs des colonnes STATUS_1 à STATUS_5)
     print("\t\tbureau_balance : Transforme les nombres d'incidents en une colonne binaire")
-    bureau_balance_df['INCIDENTS']=bureau_balance_df['STATUS_1']+bureau_balance_df['STATUS_2']+bureau_balance_df['STATUS_3']+bureau_balance_df['STATUS_4']+bureau_balance_df['STATUS_5']
-    bureau_balance_df.loc[bureau_balance_df['INCIDENTS']>0, 'INCIDENTS']=1  # Puis passe en 0/1
+    bureau_balance_df['INCIDENTS'] = (bureau_balance_df['STATUS_1'] + bureau_balance_df['STATUS_2'] + bureau_balance_df['STATUS_3'] +
+                                      bureau_balance_df['STATUS_4'] + bureau_balance_df['STATUS_5'])
+    bureau_balance_df.loc[bureau_balance_df['INCIDENTS'] > 0, 'INCIDENTS'] = 1  # Puis passe en 0/1
 
     # Ne conserve que les colonnes SK_ID_BUREAU et INCIDENTS
-    bureau_balance_df=bureau_balance_df[['SK_ID_BUREAU', 'MONTHS_BALANCE', 'INCIDENTS']]
+    bureau_balance_df = bureau_balance_df[['SK_ID_BUREAU', 'MONTHS_BALANCE', 'INCIDENTS']]
 
     # Affiche un aperçu du résultat de la transformation
     print("\t\tbureau_balance : contient désormais {bureau_balance_df.shape[0]} lignes et {bureau_balance_df.shape[1]} colonnes.")
 
     return bureau_balance_df
 
-###############################################################################################################
+
+# ##############################################################################################################
 
 def prepare_bureau(bureau_df, bureau_balance_df):
     '''
@@ -133,8 +131,8 @@ def prepare_bureau(bureau_df, bureau_balance_df):
     median_months_balance = np.median(bureau_balance_df['MONTHS_BALANCE'])
 
     # Les crédits de bureau_df non connus dans bureau_balance_df se retrouve avec des NaN dans les 2 nouvelles colonnes INCIDENTS et MONTHS_BALANCE
-    bureau_df.loc[bureau_df['INCIDENTS'].isnull(),      'INCIDENTS']=0                          # Remplacer les NaN de INCIDENTS par des 0 (car on a pas connaissance d'incidents pour ces crédits)
-    bureau_df.loc[bureau_df['MONTHS_BALANCE'].isnull(), 'MONTHS_BALANCE']=median_months_balance # Remplacer les NaN de MONTHS_BALANCE par la mediane des MONTHS_BALANCE
+    bureau_df.loc[bureau_df['INCIDENTS'].isnull(),      'INCIDENTS']      = 0                       # Remplacer les NaN de INCIDENTS par des 0 (car on a pas connaissance d'incidents pour ces crédits)
+    bureau_df.loc[bureau_df['MONTHS_BALANCE'].isnull(), 'MONTHS_BALANCE'] = median_months_balance   # Remplacer les NaN de MONTHS_BALANCE par la mediane des MONTHS_BALANCE
 
     print("\t\tbureau : Suppression des crédits dans les monnaies autre que currency 1")
     anc_nbr_lignes = bureau_df.shape[0]
@@ -145,10 +143,14 @@ def prepare_bureau(bureau_df, bureau_balance_df):
     del bureau_df['CREDIT_CURRENCY']
 
     # Compte le nombre de crédits clos et le nombre de crédit clos pour lesquels au moins un incident de paiemment est survennus
-    bureau_clos_df = bureau_df[bureau_df['CREDIT_ACTIVE']=='Closed'].groupby('SK_ID_CURR', as_index=False).agg(CREDITS_CLOS=('SK_ID_CURR', 'count'), INCIDENTS_CREDITS_CLOS=('INCIDENTS', 'max')).reset_index(drop=True)
+    bureau_clos_df = bureau_df[bureau_df['CREDIT_ACTIVE'] == 'Closed'].groupby('SK_ID_CURR', as_index=False)    \
+                                                                      .agg(CREDITS_CLOS=('SK_ID_CURR', 'count'), INCIDENTS_CREDITS_CLOS=('INCIDENTS', 'max')) \
+                                                                      .reset_index(drop=True)
 
     # Compte le nombre de crédits actif et le nombre de crédit actif pour lesquels au moins un incident de paiemment est survennus
-    bureau_actifs_df = bureau_df[bureau_df['CREDIT_ACTIVE']=='Active'].groupby('SK_ID_CURR', as_index=False).agg(CREDITS_ACTIFS=('SK_ID_CURR', 'count'), INCIDENTS_CREDITS_ACTIFS=('INCIDENTS', 'max')).reset_index(drop=True)
+    bureau_actifs_df = bureau_df[bureau_df['CREDIT_ACTIVE'] == 'Active'].groupby('SK_ID_CURR', as_index=False)   \
+                                                                        .agg(CREDITS_ACTIFS=('SK_ID_CURR', 'count'), INCIDENTS_CREDITS_ACTIFS=('INCIDENTS', 'max'))  \
+                                                                        .reset_index(drop=True)
 
     # Joins les deux dataframe clos et actifs
     print("\t\tbureau : Agrege les nombres de credits clos et actifs et les nombre d'incidents")
@@ -161,27 +163,27 @@ def prepare_bureau(bureau_df, bureau_balance_df):
     # Remplace les valeurs NAN par des 0 (il se peut qu'il n'y ait qu'un type de crédit (actif ou clos) pour ID_CURR)
     print("\t\tbureau : Remplace les valeurs NAN par des 0")
     for col in ['CREDITS_CLOS', 'INCIDENTS_CREDITS_CLOS', 'CREDITS_ACTIFS', 'INCIDENTS_CREDITS_ACTIFS']:
-        bureau_incidents_df.loc[bureau_incidents_df[col].isnull(), col]=0
+        bureau_incidents_df.loc[bureau_incidents_df[col].isnull(), col] = 0
 
     print("\t\tbureau : Suppression des crédits clos pour n'agréger que les informations des crédits encore actifs")
-    bureau_df.drop(bureau_df[bureau_df['CREDIT_ACTIVE']=='Closed'].index, inplace=True)
+    bureau_df.drop(bureau_df[bureau_df['CREDIT_ACTIVE'] == 'Closed'].index, inplace = True)
 
     aggregations = {
-        'DAYS_CREDIT'           : 'median',                     # Ancienneté du précédent crédit (en jours)
-        'DAYS_CREDIT_ENDDATE'   : 'median',                     # Durée restante du crédit CB (en jours)
-        'DAYS_CREDIT_UPDATE'    : 'median',                     # Ancienneté des informations (en jours)
-        'CREDIT_DAY_OVERDUE'    : 'median',                     # Nombre de jours de retard sur le crédit CB
-        'DAYS_ENDDATE_FACT'     : 'median',                     # Nombre de jours depuis la cloture du crédit CB
-        'AMT_CREDIT_SUM'        : 'sum',                        # Montant actuel de l'encourt crédit
-        'AMT_CREDIT_SUM_DEBT'   : 'sum',                        # Montant débiteur actuel sur les crédits en cours
+        'DAYS_CREDIT':            'median',                     # Ancienneté du précédent crédit (en jours)
+        'DAYS_CREDIT_ENDDATE':    'median',                     # Durée restante du crédit CB (en jours)
+        'DAYS_CREDIT_UPDATE':     'median',                     # Ancienneté des informations (en jours)
+        'CREDIT_DAY_OVERDUE':     'median',                     # Nombre de jours de retard sur le crédit CB
+        'DAYS_ENDDATE_FACT':      'median',                     # Nombre de jours depuis la cloture du crédit CB
+        'AMT_CREDIT_SUM':         'sum',                        # Montant actuel de l'encourt crédit
+        'AMT_CREDIT_SUM_DEBT':    'sum',                        # Montant débiteur actuel sur les crédits en cours
         'AMT_CREDIT_SUM_OVERDUE': 'sum',                        # Montant débiteur actuel sur l'encourt crédit
-        'AMT_CREDIT_SUM_LIMIT'  : 'max',                        # Limite de crédit actuelle de la CB
-        'CNT_CREDIT_PROLONG'    : 'sum',                        # Combien de fois le crédit a-t-il été prolongé
-        'MONTHS_BALANCE'        : 'median',                     # Medianne des durées de crédit en mois
-        #'CREDIT_TYPE'           : lambda x: x.mode().iloc[0]   # Comme on agrege l'historique de plusieurs types de crédits : on ne garde pas cette information
+        'AMT_CREDIT_SUM_LIMIT':   'max',                        # Limite de crédit actuelle de la CB
+        'CNT_CREDIT_PROLONG':     'sum',                        # Combien de fois le crédit a-t-il été prolongé
+        'MONTHS_BALANCE':         'median',                     # Medianne des durées de crédit en mois
+        # 'CREDIT_TYPE':            lambda x: x.mode().iloc[0]   # Comme on agrege l'historique de plusieurs types de crédits : on ne garde pas cette information
     }
 
-    bureau_num_df  = bureau_df[bureau_df['CREDIT_ACTIVE']=='Active'].groupby('SK_ID_CURR', as_index=False).agg(aggregations)
+    bureau_num_df  = bureau_df[bureau_df['CREDIT_ACTIVE'] == 'Active'].groupby('SK_ID_CURR', as_index=False).agg(aggregations)
     bureau_num_df  = bureau_num_df.reset_index(drop=True)       # Reindex le résultat pour la suite
 
     # Finalement on joins bureau_num_df et bureau_incidents_df
@@ -193,7 +195,7 @@ def prepare_bureau(bureau_df, bureau_balance_df):
 
     # Remplace les valeurs NAN par des 0 (il se peut qu'il n'y ait pas de crédit actif pour ID_CURR)
     for col in bureau_df.columns:
-        bureau_df.loc[bureau_df[col].isnull(), col]=0
+        bureau_df.loc[bureau_df[col].isnull(), col] = 0
 
     # Renomme certaines colonnes en préparation de la future fusion avec le fichier principal
     print("\t\tbureau : Renomme quelques colonnes ...")
@@ -205,7 +207,8 @@ def prepare_bureau(bureau_df, bureau_balance_df):
     print(f"\t\tbureau : Après traitement, bureau_df contient {bureau_df.shape[0]} lignes et {bureau_df.shape[1]} colonnes.")
     return bureau_df
 
-###############################################################################################################
+
+# ##############################################################################################################
 
 def prepare_credit_card_balance(credit_card_balance_df):
     '''
@@ -219,33 +222,33 @@ def prepare_credit_card_balance(credit_card_balance_df):
 
     # Retraite les 2 colonnes SK_DPD et SK_DPD_DEF avant agrégation en binaire oui/non
     print("\t\tcredit_card_balance : Retraite les 2 colonnes SK_DPD et SK_DPD_DEF avant agrégation en binaire oui/non")
-    credit_card_balance_df.loc[credit_card_balance_df['SK_DPD']>0,     'SK_DPD'] = 1
-    credit_card_balance_df.loc[credit_card_balance_df['SK_DPD_DEF']>0, 'SK_DPD_DEF'] = 1
+    credit_card_balance_df.loc[credit_card_balance_df['SK_DPD'] > 0,     'SK_DPD'] = 1
+    credit_card_balance_df.loc[credit_card_balance_df['SK_DPD_DEF'] > 0, 'SK_DPD_DEF'] = 1
 
     # Prépare l'agrégation
     agg_data_cc_bal = {
-        'SK_ID_PREV'                    : 'count',                      # Lien avec previous_application => abandonné au profit du lien direct avec application_train : est transformé en nombre de crédit actif
-        'MONTHS_BALANCE'                : 'median',
-        'AMT_BALANCE'                   : 'mean',
-        'AMT_CREDIT_LIMIT_ACTUAL'       : 'median',
-        'AMT_DRAWINGS_ATM_CURRENT'      : 'mean',
-        'AMT_DRAWINGS_CURRENT'          : 'mean',
-        'AMT_DRAWINGS_OTHER_CURRENT'    : 'mean',
-        'AMT_DRAWINGS_POS_CURRENT'      : 'mean',
-        'AMT_INST_MIN_REGULARITY'       : 'median',
-        'AMT_PAYMENT_CURRENT'           : 'median',
-        'AMT_PAYMENT_TOTAL_CURRENT'     : 'median',
-        'AMT_RECEIVABLE_PRINCIPAL'      : 'mean',
-        'AMT_RECIVABLE'                 : 'mean',
-        'AMT_TOTAL_RECEIVABLE'          : 'median',
-        'CNT_DRAWINGS_ATM_CURRENT'      : 'sum',
-        'CNT_DRAWINGS_CURRENT'          : 'sum',
-        'CNT_DRAWINGS_OTHER_CURRENT'    : 'sum',
-        'CNT_DRAWINGS_POS_CURRENT'      : 'sum',
-        'CNT_INSTALMENT_MATURE_CUM'     : 'sum',
-        #'NAME_CONTRACT_STATUS'          : lambda x: (x == 'Active').sum(), # Ne prend pas en compte les crédits annulés => Reviens au même que de compter SK_ID_PREV
-        'SK_DPD'                        : 'median',                     # Nombre d'incidents
-        'SK_DPD_DEF'                    : 'median'                      # Nombre d'incidents avec tolerance
+        'SK_ID_PREV':                   'count',        # Lien avec previous_application => abandonné au profit du lien direct avec application_train : est transformé en nombre de crédit actif
+        'MONTHS_BALANCE':               'median',
+        'AMT_BALANCE':                  'mean',
+        'AMT_CREDIT_LIMIT_ACTUAL':      'median',
+        'AMT_DRAWINGS_ATM_CURRENT':     'mean',
+        'AMT_DRAWINGS_CURRENT':         'mean',
+        'AMT_DRAWINGS_OTHER_CURRENT':   'mean',
+        'AMT_DRAWINGS_POS_CURRENT':     'mean',
+        'AMT_INST_MIN_REGULARITY':      'median',
+        'AMT_PAYMENT_CURRENT':          'median',
+        'AMT_PAYMENT_TOTAL_CURRENT':    'median',
+        'AMT_RECEIVABLE_PRINCIPAL':     'mean',
+        'AMT_RECIVABLE':                'mean',
+        'AMT_TOTAL_RECEIVABLE':         'median',
+        'CNT_DRAWINGS_ATM_CURRENT':     'sum',
+        'CNT_DRAWINGS_CURRENT':         'sum',
+        'CNT_DRAWINGS_OTHER_CURRENT':   'sum',
+        'CNT_DRAWINGS_POS_CURRENT':     'sum',
+        'CNT_INSTALMENT_MATURE_CUM':    'sum',
+        # 'NAME_CONTRACT_STATUS':         lambda x: (x == 'Active').sum(), # Ne prend pas en compte les crédits annulés => Reviens au même que de compter SK_ID_PREV
+        'SK_DPD':                       'median',       # Nombre d'incidents
+        'SK_DPD_DEF':                   'median'        # Nombre d'incidents avec tolerance
     }
 
     # Fait l'agrégation
@@ -257,7 +260,7 @@ def prepare_credit_card_balance(credit_card_balance_df):
     # Transforme les 2 colonnes SK_DPD et SK_DPD_DEF en une seul colonne incident
     print("\t\tcredit_card_balance : Transforme les 2 colonnes SK_DPD et SK_DPD_DEF en une seul colonne incident et renommage de SK_ID_PREV")
     credit_card_balance_df['CCB_INCIDENTS_CREDITS_ACTIFS'] = credit_card_balance_df['SK_DPD'] + credit_card_balance_df['SK_DPD_DEF']
-    credit_card_balance_df.loc[credit_card_balance_df['CCB_INCIDENTS_CREDITS_ACTIFS']>0, 'CCB_INCIDENTS_CREDITS_ACTIFS'] = 1    # Passe en binaire oui/non
+    credit_card_balance_df.loc[credit_card_balance_df['CCB_INCIDENTS_CREDITS_ACTIFS'] > 0, 'CCB_INCIDENTS_CREDITS_ACTIFS'] = 1    # Passe en binaire oui/non
     credit_card_balance_df.rename(columns={'SK_ID_PREV': 'CCB_CREDITS_ACTIFS'}, inplace=True)
     del credit_card_balance_df['SK_DPD']
     del credit_card_balance_df['SK_DPD_DEF']
@@ -269,7 +272,8 @@ def prepare_credit_card_balance(credit_card_balance_df):
 
     return credit_card_balance_df
 
-###############################################################################################################
+
+# ##############################################################################################################
 
 def prepare_pos_cash_balance(pos_cash_balance_df):
     '''
@@ -283,18 +287,18 @@ def prepare_pos_cash_balance(pos_cash_balance_df):
 
     # Retraite les 2 colonnes SK_DPD et SK_DPD_DEF avant agrégation en binaire oui/non
     print("\t\tpos_cash_balance : Retraite les 2 colonnes SK_DPD et SK_DPD_DEF avant agrégation en binaire oui/non")
-    pos_cash_balance_df.loc[pos_cash_balance_df['SK_DPD']>0,     'SK_DPD']     = 1
-    pos_cash_balance_df.loc[pos_cash_balance_df['SK_DPD_DEF']>0, 'SK_DPD_DEF'] = 1
+    pos_cash_balance_df.loc[pos_cash_balance_df['SK_DPD'] > 0,     'SK_DPD']     = 1
+    pos_cash_balance_df.loc[pos_cash_balance_df['SK_DPD_DEF'] > 0, 'SK_DPD_DEF'] = 1
 
     # Prépare l'agrégation
     agg_data_pos_cash = {
-        'SK_ID_PREV'            : 'count',                              # Lien avec previous_application => abandonné au profit du lien direct avec application_train : est transformé en nombre de crédit actif
-        'MONTHS_BALANCE'        : 'median',
-        'CNT_INSTALMENT'        : 'median',
-        'CNT_INSTALMENT_FUTURE' : 'median',
-        #'NAME_CONTRACT_STATUS'  : lambda x: (x != 'Canceled').sum(),    # Ne prend pas en compte les crédits annulés => Reviens au même que de compter SK_ID_PREV
-        'SK_DPD'                : 'sum',                                # Nombre d'incidents
-        'SK_DPD_DEF'            : 'sum'                                 # Nombre d'incidents avec tolerance
+        'SK_ID_PREV':               'count',                              # Lien avec previous_application => abandonné au profit du lien direct avec application_train : est transformé en nombre de crédit actif
+        'MONTHS_BALANCE':           'median',
+        'CNT_INSTALMENT':           'median',
+        'CNT_INSTALMENT_FUTURE':    'median',
+        # 'NAME_CONTRACT_STATUS':     lambda x: (x != 'Canceled').sum(),    # Ne prend pas en compte les crédits annulés => Reviens au même que de compter SK_ID_PREV
+        'SK_DPD':                   'sum',                                # Nombre d'incidents
+        'SK_DPD_DEF':               'sum'                                 # Nombre d'incidents avec tolerance
     }
 
     # Fait l'agrégation
@@ -306,7 +310,7 @@ def prepare_pos_cash_balance(pos_cash_balance_df):
     # Transforme les 2 colonnes SK_DPD et SK_DPD_DEF en une seul colonne incident
     print("\t\tpos_cash_balance : Transforme les 2 colonnes SK_DPD et SK_DPD_DEF en une seul colonne incident et renommage de SK_ID_PREV")
     pos_cash_balance_df['PCB_INCIDENTS_CREDITS_ACTIFS'] = pos_cash_balance_df['SK_DPD'] + pos_cash_balance_df['SK_DPD_DEF']
-    pos_cash_balance_df.loc[pos_cash_balance_df['PCB_INCIDENTS_CREDITS_ACTIFS']>0, 'PCB_INCIDENTS_CREDITS_ACTIFS'] = 1    # Passe en binaire oui/non
+    pos_cash_balance_df.loc[pos_cash_balance_df['PCB_INCIDENTS_CREDITS_ACTIFS'] > 0, 'PCB_INCIDENTS_CREDITS_ACTIFS'] = 1    # Passe en binaire oui/non
     del pos_cash_balance_df['SK_DPD']
     del pos_cash_balance_df['SK_DPD_DEF']
     pos_cash_balance_df.rename(columns={'SK_ID_PREV': 'PCB_CREDITS_ACTIFS'}, inplace=True)
@@ -318,7 +322,8 @@ def prepare_pos_cash_balance(pos_cash_balance_df):
 
     return pos_cash_balance_df
 
-###############################################################################################################
+
+# ##############################################################################################################
 
 def preprocessing():
     '''
@@ -363,7 +368,7 @@ def preprocessing():
     # Supprime previous_application_df qui ne servira plus => force le garbage collector
     del previous_application_df
 
-    print(f"\nFusion des fichiers bureau, credit_card_balance et pos_cash")
+    print("\nFusion des fichiers bureau, credit_card_balance et pos_cash")
 
     # Fusionne les dataframes des fichiers secondaires
     temp_df = pd.merge(bureau_df, credit_card_balance_df, left_on="SK_ID_CURR", right_on="SK_ID_CURR", how="outer")
@@ -377,7 +382,7 @@ def preprocessing():
 
     # Additionne les colonnes B_INCIDENTS_CREDITS_ACTIFS, CCB_INCIDENTS_CREDITS_ACTIFS et PCB_INCIDENTS_CREDITS_ACTIFS
     temp_df['INCIDENTS_CREDITS_ACTIFS'] = temp_df['B_INCIDENTS_CREDITS_ACTIFS'] + temp_df['CCB_INCIDENTS_CREDITS_ACTIFS'] + temp_df['PCB_INCIDENTS_CREDITS_ACTIFS']
-    temp_df.loc[temp_df['INCIDENTS_CREDITS_ACTIFS']>0, 'INCIDENTS_CREDITS_ACTIFS'] = 1  # Passe en binaire oui/non
+    temp_df.loc[temp_df['INCIDENTS_CREDITS_ACTIFS'] > 0, 'INCIDENTS_CREDITS_ACTIFS'] = 1  # Passe en binaire oui/non
     del temp_df['B_INCIDENTS_CREDITS_ACTIFS']
     del temp_df['CCB_INCIDENTS_CREDITS_ACTIFS']
     del temp_df['PCB_INCIDENTS_CREDITS_ACTIFS']
@@ -395,7 +400,7 @@ def preprocessing():
     # Renomme toutes les colonnes pour les préfixées avec un "_SEC_" afin de pouvoir les reconnaitre par la suite
     for col in temp_df.columns:
         if col != 'SK_ID_CURR':
-            temp_df.rename(columns={col : "_SEC_" + col}, inplace=True)
+            temp_df.rename(columns={col: "_SEC_" + col}, inplace=True)
 
     # Fusionne avec le fichier principal
     app_train_df = pd.merge(app_train_df, temp_df, left_on="SK_ID_CURR", right_on="SK_ID_CURR", how="outer")
@@ -409,16 +414,16 @@ def preprocessing():
     print(f"\tAprès fusion des fichiers app_train_df contient {app_train_df.shape[0]} lignes et {app_train_df.shape[1]} colonnes")
 
     print("\t\tTraitement des anomalies sur la variable DAYS_EMPLOYED")
-    app_train_df['DAYS_EMPLOYED_ANOM'] = app_train_df["DAYS_EMPLOYED"]==365243                      # Creation d'une colonne indiquant une anomalie
+    app_train_df['DAYS_EMPLOYED_ANOM'] = app_train_df["DAYS_EMPLOYED"] == 365243                    # Creation d'une colonne indiquant une anomalie
     app_train_df['DAYS_EMPLOYED']      = app_train_df['DAYS_EMPLOYED'].replace({365243: np.nan})    # Remplace les valeurs en anomalie par nan
 
     print("\t\tTraitement des valeurs manquantes, aberrantes ou mal renseignées")
     # Remplace toutes les valeurs XNA et XAP en NaN dans plusieursvariables catégorielles (erreur de saisie ?)
-    app_train_df.replace("XNA", np.nan,inplace=True)
-    app_train_df.replace("XAP", np.nan,inplace=True)
+    app_train_df.replace("XNA", np.nan, inplace=True)
+    app_train_df.replace("XAP", np.nan, inplace=True)
 
     # Chercher les colonnes numériques qui contiennent des valeurs manquantes
-    numeric_col_with_nan = list(set(app_train_df.columns[app_train_df.isnull().sum()!=0].tolist()) & set(app_train_df.select_dtypes(include=np.number).columns.tolist()))
+    numeric_col_with_nan = list(set(app_train_df.columns[app_train_df.isnull().sum() != 0].tolist()) & set(app_train_df.select_dtypes(include=np.number).columns.tolist()))
 
     # Remplir les valeurs vides par la moyenne
     for col in numeric_col_with_nan:
@@ -426,24 +431,24 @@ def preprocessing():
         app_train_df[col] = app_train_df[col].fillna(mean_val)
 
     # Chercher les colonnes textes qui contiennent des valeurs manquantes
-    object_col_with_nan = list(set(app_train_df.columns[app_train_df.isnull().sum()!=0].tolist()) & set(app_train_df.select_dtypes(include=object).columns.tolist()))
+    object_col_with_nan = list(set(app_train_df.columns[app_train_df.isnull().sum() != 0].tolist()) & set(app_train_df.select_dtypes(include=object).columns.tolist()))
 
     # Remplace toutes les valeurs NaN par "" pour toutes les colonnes du dataframe
     app_train_df = app_train_df.fillna("")
 
-    #Remplacement des valeurs catégorielles égale à "" par la valeur la plus fréquente de la variable (autre que "")
+    # Remplacement des valeurs catégorielles égale à "" par la valeur la plus fréquente de la variable (autre que "")
     for col in object_col_with_nan:
         # Récupère les différentes valeurs pour la série
         most_val = app_train_df[col].value_counts(normalize=False, sort=True, ascending=False, bins=None, dropna=True).index
         # Si la première n'est pas vide
-        if most_val[0]!="":
+        if most_val[0] != "":
             # La prend pour remplir les valeurs vides
-            most_val=most_val[0]
-        else :
+            most_val = most_val[0]
+        else:
             # Sinon, prend la deuxième valeur pour remplir les valeurs vides
-            most_val=most_val[1]
+            most_val = most_val[1]
         # Remplace les valeurs vides
-        app_train_df.loc[app_train_df[col]=="", col]=most_val
+        app_train_df.loc[app_train_df[col] == "", col] = most_val
 
     print("\t\tEncodage des variables catégorielles")
     # Label Encoding pour toutes les variables catégorielles avec seulement 2 catégories => fonction [`LabelEncoder` de Scikit-Learn](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html)
