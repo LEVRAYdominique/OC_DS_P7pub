@@ -139,6 +139,13 @@ def Client_credit_from_data(client_data) -> Client_credit:
                          TARGET                   = client_data['TARGET'])
 
 
+def to_Client_credit(Client_new_credit) -> Client_credit:
+    return Client_credit(Client_new_credit.SK_ID_CURR,      Client_new_credit.FLAG_OWN_REALTY,          Client_new_credit.FLAG_OWN_CAR,
+                            Client_new_credit.OWN_CAR_AGE,     Client_new_credit.NAME_INCOME_TYPE_Working, Client_new_credit.DAYS_EMPLOYED,
+                            Client_new_credit.AMT_GOODS_PRICE, Client_new_credit.AMT_CREDIT,               Client_new_credit.EXT_SOURCE_1_x,
+                            Client_new_credit.EXT_SOURCE_2_x,  Client_new_credit.EXT_SOURCE_3_x)
+
+
 # -------------------------------------------------------------------------------------------------------------------
 # La fonction MAIN
 # Note : ce fichier est prévu pour être exécuté avec uvicorn  : il n'y a donc pas le traditionnel
@@ -211,7 +218,7 @@ def calcul_nouveau_credit(new_client: Client_new_credit) -> Client_credit:
     if part_data_df.shape[0] == 0:
         raise HTTPException(status_code=404, detail="SK_ID_CURR non trouvé !")
 
-    return Client_credit_from_data(new_client.to_new_data())
+    return Client_credit_from_data(to_Client_credit(new_client).to_new_data())
 
 
 # --------------------------------------------------------

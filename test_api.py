@@ -31,8 +31,8 @@ API_POST      = "/post_client/{Client_new_credit}"
 
 HTTPS_TIMEOUT = 30                                                  # Timeout pour les requettes https (30 secondes)
 
-GOOD_ID_CLIENT = 208132
-BAD_ID_CLIENT  = 296207
+GOOD_ID_CLIENT = 283931
+BAD_ID_CLIENT  = 283932
 BAD_ID_FORMAT  = 45
 
 GOOD_DICT_CLIENT = {"SK_ID_CURR": 100043,
