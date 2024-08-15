@@ -44,6 +44,7 @@ Objectifs pédagogiques du projet :
 
 
 **Ce dépôt contient la partie publique du projet et comprend :**
+(URL du dépot GitHub publique : https://github.com/LEVRAYdominique/OC_DS_P7pub)
 - Le script python d'une API (réalisé avec FastAPI) de prediction à publier sur un environnement heroku
     - levray_dominique_1_api_072024.py
 - Les fichiers d'un modele lightgbm entrainé pour réaliser ces prédictions
@@ -72,4 +73,4 @@ Objectifs pédagogiques du projet :
 - Swagger FastAPP de l'API : [https://oc-projet-7-c21cbfffa8fb.herokuapp.com/docs](https://oc-projet-7-c21cbfffa8fb.herokuapp.com/docs)
 
 **Notes concernant les tests et GitHUB**
-- L'API devrant être en ligne (sur heroku) pour être testée, les tests sont donc fait à postériori du déploiement
+- L'API devant être en ligne (sur heroku) pour être testée, les tests sont donc fait à postériori du déploiement
