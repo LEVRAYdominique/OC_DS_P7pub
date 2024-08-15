@@ -31,11 +31,11 @@ API_POST      = "/post_client/{Client_new_credit}"
 
 HTTPS_TIMEOUT = 30                                                  # Timeout pour les requettes https (30 secondes)
 
-GOOD_ID_CLIENT = 283931
-BAD_ID_CLIENT  = 283932
+GOOD_ID_CLIENT = 207108
+BAD_ID_CLIENT  = 207109
 BAD_ID_FORMAT  = 45
 
-GOOD_DICT_CLIENT = {"SK_ID_CURR": 100043,
+GOOD_DICT_CLIENT = {"SK_ID_CURR": 207108,
                     "FLAG_OWN_REALTY": 1,
                     "FLAG_OWN_CAR": 0,
                     "OWN_CAR_AGE": 12.061090818687727,
@@ -47,7 +47,7 @@ GOOD_DICT_CLIENT = {"SK_ID_CURR": 100043,
                     "EXT_SOURCE_2_x": 0.6816988025574287,
                     "EXT_SOURCE_3_x": 0.7544061731797895}
 
-BAD_DICT_ID_CLIENT = {"SK_ID_CURR": 296207,
+BAD_DICT_ID_CLIENT = {"SK_ID_CURR": 207109,
                       "FLAG_OWN_REALTY": 1,
                       "FLAG_OWN_CAR": 0,
                       "OWN_CAR_AGE": 12.061090818687727,
@@ -59,7 +59,7 @@ BAD_DICT_ID_CLIENT = {"SK_ID_CURR": 296207,
                       "EXT_SOURCE_2_x": 0.6816988025574287,
                       "EXT_SOURCE_3_x": 0.7544061731797895}
 
-BAD_DICT_FORMAT = {"SK_ID_CURR": 100043,
+BAD_DICT_FORMAT = {"SK_ID_CURR": 207108,
                    "FLAG_OWN_REALTY": 1,
                    "FLAG_OWN_CAR": 0,
                    "OWN_CAR_AGE": 12.061090818687727,
