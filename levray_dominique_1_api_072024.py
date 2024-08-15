@@ -139,11 +139,12 @@ def Client_credit_from_data(client_data) -> Client_credit:
                          TARGET                   = client_data['TARGET'])
 
 
-def to_Client_credit(Client_new_credit) -> Client_credit:
-    return Client_credit(Client_new_credit.SK_ID_CURR,      Client_new_credit.FLAG_OWN_REALTY,          Client_new_credit.FLAG_OWN_CAR,
-                            Client_new_credit.OWN_CAR_AGE,     Client_new_credit.NAME_INCOME_TYPE_Working, Client_new_credit.DAYS_EMPLOYED,
-                            Client_new_credit.AMT_GOODS_PRICE, Client_new_credit.AMT_CREDIT,               Client_new_credit.EXT_SOURCE_1_x,
-                            Client_new_credit.EXT_SOURCE_2_x,  Client_new_credit.EXT_SOURCE_3_x)
+def to_Client_credit(credit: Client_new_credit) -> Client_credit:
+    '''Converti une structure Client_new_credit en une structure Client_credit'''
+    return Client_credit(credit.SK_ID_CURR,      credit.FLAG_OWN_REALTY,          credit.FLAG_OWN_CAR,
+                         credit.OWN_CAR_AGE,     credit.NAME_INCOME_TYPE_Working, credit.DAYS_EMPLOYED,
+                         credit.AMT_GOODS_PRICE, credit.AMT_CREDIT,               credit.EXT_SOURCE_1_x,
+                         credit.EXT_SOURCE_2_x,  credit.EXT_SOURCE_3_x)
 
 
 # -------------------------------------------------------------------------------------------------------------------
