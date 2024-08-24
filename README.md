@@ -2,7 +2,9 @@
 OpenClassrooms - Cursus Data Scientist - Projet n°7<br>
 Réalisé par Dominique LEVRAY en Juillet/Août 2024
 
-**Implémentez un modèle de scoring**
+Modifié en Août 2024 par Dominique LEVRAY pour intégrer une version 2 pour le Projet n°8
+
+**Projet n°7 : Implémentez un modèle de scoring**
 
 Missions :
 - Mission 1 :
@@ -27,6 +29,11 @@ Missions :
     - Déploiement de l'API sur une plateforme de cloud (heroku)
         - Mise en place d'un pipeline heroku de déploiement automatique à chaque publication d'une nouvelle version dans la branche « main » du GitHub publique
 
+**Projet n°8 : Réalisez un dashboard et assurez une veille technique**
+
+- Version 2 : 
+    Ajout d’une nouvelle requête GET sur /prediction permetant d’obtenir une probabilité en fournissant toutes les valeurs (112 variables) et non plus seulement 14 variables.
+    
 
 Sources :
 - Les données sources sont disponible [ici](https://s3-eu-west-1.amazonaws.com/static.oc-static.com/prod/courses/files/Parcours_data_scientist/Projet+-+Impl%C3%A9menter+un+mod%C3%A8le+de+scoring/Projet+Mise+en+prod+-+home-credit-default-risk.zip)
